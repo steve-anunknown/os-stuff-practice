@@ -1,0 +1,36 @@
+[Q] Explain the role of init (or systemd) process on UNIX and Linux systems in
+regard to process termination.
+
+[A] The role of the init process as far as process termination is concerned is
+to terminate zombie processes. Zombie processes are child processes that were
+created but were not waited on by their parent process. As a result, even
+though they may have finished their execution, their PCB is retained by the OS
+because it thinks that the parent process may need it in order to acquire their
+id. If the parent process finished without waiting for the children, then this
+will never happen and the PCBs will remain in memory forever.  That's why the
+init process periodically checks for zombie processes and cleans them up.
+
+[Q] How many processes are created (including the original one) by a program
+containing the loop: {for (i=0; i<4; ++i) fork();} ?
+
+[A] 2^4 = 16. In general, 2^{number of forks with no pid check}.
+
+[Q] Explain the circumstances under which the line of code marked with
+printf("LINE J") will be reached.
+
+...
+if (pid == 0) { execlp("/bin/ls", "ls", NULL); printf("LINE J");}
+...
+
+[A] All of the functions in the exec family completely replace the current
+process and all of its threads if they are called successfully. Otherwise, they
+return to the calling process with an error code. Therefore, the line will be
+reached if and only if the execlp command fails.
+
+[Q] Give an example of a situation in which ordinary pipes are more suitable
+than named pipes and an example of a situation in which named pipes are more
+suitable than ordinary pipes.
+
+[A] Ordinary pipers are more suitable for communication between parent-child
+processes and named pipes are more suitable for communication between unrelated
+processes.

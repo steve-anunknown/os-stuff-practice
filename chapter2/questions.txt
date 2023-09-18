@@ -1,0 +1,76 @@
+[Q] What is the purpose of system calls?
+
+[A] The purpose of systems calls is to provide an interface to the services
+provided by the operating system.
+
+[Q] What is the purpose of the command interpreter? Why is it usually separate
+from the kernel?
+
+[A] The purpose of the command interpreter is to execute user-specified commands
+for the user to interact with the operating system. These commands are
+written in a higher level language and are, therefore, more abstract than
+system calls. 
+
+[Q] What system calls have to be executed by a command interpreter or shell in
+order to start a new process on a UNIX system?
+
+[A] The command interpreter has to execute the fork() system call to create
+a new process. The new process will run the actual command by executing
+the exec() system call.
+
+[Q] What is the purpose of system programs?
+
+[A] The purpose of system programs is to extend the functionality of
+the operating system.
+
+[Q] What is the main advantage of the layered approach to system design?
+
+[A] Separation of concerns and easier debugging, smaller structs to be taken care
+of, extensibility and easier maintainance.
+
+[Q] What are the disadvantages of the layered approach?  List five services
+provided by an operating system, and explain how each creates convenience for
+users. In which cases would it be impossible for user-level programs to provide
+these services? Explain your answer.
+
+[A] 
+
+1. Program execution -> A user level program cannot be trusted to properly
+                        allocate CPU time
+2. I/O -> A user level program cannot be trusted to properly access devices
+          and to replicate the functionality of interrupts, that is,
+          access the devices only when needed.
+3. File-system manipulation -> File-system manipulation contains many
+                               low level concerns that cannot be trusted
+                               to be carried out by the user.
+4. Communication -> Networking also contains low level concerns that
+                    cannot be trusted to the user.
+5. Error detection -> Errors can happen at every level and therefore
+                      need some kind of ultimate supervisor that can
+                      handle them all. This supervisor is the operating
+                      system. The user cannot supervise their own errors.
+
+[Q] Why do some systems store the operating system in firmware, while others
+store it on disk?
+
+[A] Some systems may not have access to secondary non volatile storage as is a
+magnetic disk, for example embedded systems.
+
+[Q] How could a system be designed to allow a choice of operating systems from
+which to boot? What would the bootstrap program need to do?
+
+[A] For a system to be able to choose which operating system to boot from, the
+bootstrap program would need to jump to some kind of program that keeps track
+of the available operating systems and their configuration, instead of jumping
+straight to the address that executes one operating system.
+
+[Q] The services and functions provided by an operating system can be divided
+into two main categories. Briefly describe the two categories, and discuss how
+they differ.
+
+[A] One service that the operating system provides is the ability to run
+multiple programs at once. This includes avoiding unwanted interactions
+between programs and also maintaining some kind of policy that ensures
+fair execution. Another service that the operating system provides is
+the ability to expand the functionality of the hardware. 
+
