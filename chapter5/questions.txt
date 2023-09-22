@@ -1,0 +1,90 @@
+[Q] Given n processes to be scheduled on one processor, how many different
+schedules are possible?
+
+[A] The answer is the number of possible combinations of n items, that is, n
+factorial (n!).
+
+[Q] Explain the difference between preemptive and non- preemptive scheduling.
+
+[A] Preemptive scheduling reserves the right to interfere with the CPU burst of
+a process, while non-preemptive has no such right and chooses to wait until the
+process needs IO.
+
+[Q] What advantage is there in having different time-quantum sizes at different
+levels of a multilevel queueing system?
+
+[A] Time-quantum sizes can be properly adjusted to fit the profile of the
+processes in each specific queue.
+
+[Q] Many scheduling algorithms are in reality sets of algorithms whose elements
+are algorithms with a value for each parameter. What (if any) relation holds
+between the following pairs of algorithm sets?
+
+a. Priority and SJF
+b. Multilevel feedback queues and FCFS
+c. Priority and FCFS
+d. RR and SJF
+
+[A]
+a. SJF is an element of the set of priority scheduling algorithms whose
+priority equals the inverse of the length of the cpu burst of a process.
+b. FCFS is an element of the set of multilevel feedback queues algorithms
+where the number of queues is 1 and the priority is the inverse of the
+time of arrival of a process.
+c. FCFS is an element of the set of priority scheduling algorithms whose
+priority equals the inverse of the time of arrival of a process.
+d. There is no relation between RR and SJF.
+
+[Q] Suppose a CPU scheduling algorithm that favors processes that have used the
+least processor time in the recent past. Why will this algorithm favor
+I/O-bound programs and yet not permanently starve CPU-bound programs?
+
+[A] This algorithm will favor I/O-bound programs because those programs
+typically have shorter CPU bursts and therefore use less processor time than
+CPU-bound programs. However, supposing that the algorithm is preemptive, this
+means that a CPU-bound program will be put on hold in favor of an I/O-bound
+program, therefore reducing its CPU usage. As a result, it will have a higher
+priority in the future than it did before and a higher probability of being
+chosen by the scheduler.
+
+[Q] Distinguish between PCS and SCS scheduling.
+
+[A] PCS scheduling is completed locally to the process. It is how a thread
+library schedules threads onto available LWPs. SCS scheduling is the
+circumstances where the operating system schedules kernel threads. On systems
+utilizing either many-to-one or many-to-many, the two scheduling models are
+fundamentally different. On systems utilizing one-to-one PCS and SCS are the
+same.
+
+[Q] Which type of program between I/O-bound and CPU-bound is more likely to
+have voluntary context switches and which is more likely to have nonvoluntary
+context switches?
+
+[A] I/O-bound programs are more likely to have voluntary context switches
+because they have to "wait" for IO more often. Similarly, CPU-bound programs
+are more likely to be nonvoluntarily interrupted by the scheduler.
+
+[Q] Describe why a shared ready queue might suffer from performance problems in
+an SMP environment.
+
+[A] Because the same process can be assigned, potentially, to every processor.
+Therefore, the benefits of caching important memory locations of each process
+are wasted.
+
+[Q] Consider a load-balancing algorithm that ensures that each queue has
+approximately the same number of threads, independent of priority.  How
+effectively would a priority-based scheduling algorithm handle this situation
+if one run queue had all high-priority threads and a second queue had all
+low-priority threads?
+
+[A] I think that the load-balancing algorithm messes with the priority of the
+queues. For example, if a bunch of high priority threads finish executing, then
+an imbalance will occur. The load-balancing algorithm will attempt to fix the
+imbalance by moving some of the low priority threads to the other queue.
+Therefore, the high priority queue will now contain low priority threads. I
+believe that the priorities of the threads would have to be dynamically
+readjusted in order for this scheme to work.
+
+[Q] Assume that a thread has blocked for network I/O and is eligible to run
+again. Describe why a NUMA-aware scheduling algorithm should reschedule the
+thread on the same CPU on which it previously ran.
