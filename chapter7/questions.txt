@@ -1,0 +1,24 @@
+[Q] Describe two kernel data structures in which race conditions are possible.
+Be sure to include a description of how a race condition can occur.
+
+[A] The kernel structure that handles PIDs is vulnerable to race condition on
+the PID assigned to a new process, if two or more processes are created at the
+same time. Two processes could be assigned the same PID, which is a problem on
+its own, but then the PID counter would also be wrong. Also, scheduling queues
+are also prone to data races in multiprocessor systems with a common queue.
+
+[Q] The Linux kernel has a policy that a process cannot hold a spinlock while
+attemtping to acquire a semaphore. Explain why this policy is in place.
+
+[A] Semaphores do not usually have low contentions. That means that a lot of 
+processes will attempt to claim a resource and that the waiting time is not
+miniscule. As a result, there is a high possiblity that a process will have
+to wait for a long time, making the spinlock an unviable option.
+
+[Q] Explain the difference between software and hardware transactional memory.
+
+[A] The former refers to a software implementation with no special hardware.
+Instrumentation code is added inside transcatino blocks and a compiler manages
+each transcation by figuring out where low-level locking is required. The
+latter uses cache hierarchies and coherency protocols to resolve conflicts
+involving shared data.

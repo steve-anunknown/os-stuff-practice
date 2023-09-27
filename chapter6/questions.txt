@@ -1,0 +1,191 @@
+[Q] Disabling interrupts frequently can affect the system's clock.  Explain why
+this can occur and how such effects can be minimized.
+
+[A] The system clock gets updated at every clock interrupt, so, if interrupts
+are disabled for too long then it goes out of sync.
+
+[Q] What is the meaning of the term busy waiting? What other kinds of waiting
+are there in an operating system? Can busy waiting be avoided altogether?
+
+[A] Busy waiting means that a process waits in a way that occupies the
+processor, that is, therefore, busy. This kind of waiting contrast to pausing
+the execution of a process and putting into a waiting queue so that it doesn't
+occupy the processor anymore. This, however, isn't always possible, because, in
+order to be put to the waiting queue, you have to have a process id. Lower
+level processes, like interrupt handling routines, cannot be put into waiting
+queues and have to wait using busy waiting techniques.
+
+[Q] Explain why spinlocks are not appropriate for single-processor systems yet
+are often used in multiprocessor systems.
+
+[A] Spinlocks are not appropriate for single-processor systems because they are
+a busy waiting technique and hog the processor. Therefore, if a process were to
+wait using spinlocks, there would be no way to break out of it, deeming it
+stuck. Contrary to that, multiprocessor systems do not face this problem, since
+there are other CPUs that can modify the resource that keeps the process
+locked, thereby freeing it.
+
+[Q] Show that, if the wait() and signal() semaphore operations are not executed
+atomically, then mutual exclusion may be violated.
+
+[A] The definitions of the processes are:
+
+    wait(S)             signal(S)
+    {                   {
+        while(S <= 0)       S++;
+            ;           }
+        S--;
+    }
+
+Suppose that S = 1, so the wait breaks out of the loop and attempts to decrement S.
+At the same time, another process calls signal, so it attempts to increment S.
+We would expect the outcome to be S = 1, but that is not the case if the instructions
+are interleaved: 
+
+(S--) ====> load register, S   // S = 1 ||
+            register = register - 1     || (S++) ====> load register_2, S           // S = 1
+            // S = 0                    || 
+            store S, register  // S = 0 ||             register_2 = register_2 + 1  // S = 2
+                                                       store S, register_2          // S = 2 instead of S = 1
+
+If the machine instructions are interleaved, that is, the operations are not
+performed atomically, then the value of S may be wrong.
+
+[Q] Illustrate how a binary semaphore can be used to implement mutual exclusion
+among n processes.
+
+[A] The semaphore can be initialized to 1 (one process can enter the critical section)
+and be 0 when some process is in the critical section, so the others are waiting.
+
+[Q] Consider a banking system that maintains an account balance with two
+functions: deposit(amount) and withdraw(amount). These two functions are passed
+the amount that is to be deposited or withdrawn from the bank account balance.
+Assume that a husband and wife share a bank account.  Concurrently, the husband
+calls the withdraw() function, and the wife calls deposit(). Describe how a
+race condition is possible and what might be done to prevent the race condition
+from occurring.
+
+[A] One of the two functions can read the remaining balance before the other one
+gets a chance to update it. Therefore, the result will be wrong (either a greater
+balance if the withdraw function reads before the deposit function updates, or
+a lesser balance if the opposite happens). Since contention is low, a simple
+spinlock can guard against the race condition.
+
+[Q] Consider an online auction system where the current highest bid for each
+item must be maintained. A person who wishes to bid on an item calls the
+bid(amount) function, which compares the amount being bid to the current
+highest bid. If the amount exceeds the current highest bid, the highest bid is
+set to the new amount. This is illustrated below:
+
+    void bid(double amount) { if (amount > highestBid) highestBid = amount; }
+
+Describe how a race condition is possible in this situation and what might be
+done to prevent the race condition from occurring.
+
+[A] Consider three bids, B1 > B2 > B0. If the bids are placed in order 0-1-2
+then the last one should not be accepted. However, if 1-2 are placed concurrently
+there is a chance that the last one will be accepted, if the highestBid hasn't
+been updated to the value of B2, resulting in an erroneous acceptance of B1
+as the highestBid.
+
+[Q] The following program example can be used to sum the array values of size N
+elements in parallel on a system containing N computing cores (there is a
+separate processor for each array element):
+
+    for j = 1 to log 2(N) {
+        for k = 1 to N { // every processor can handle a value of k.
+            if ((k + 1) % pow(2,j) == 0) {
+                values[k] += values[k - pow(2,(j-1))]
+            }
+        }
+    } 
+
+This has the effect of summing the elements in the array as a series of partial
+sums. After the code has executed, the sum of all elements in the array is
+stored in the last array location.  Are there any race conditions in the above
+code example? If so, identify where they occur and illustrate with an example.
+If not, demonstrate why this algorithm is free from race conditions.
+
+[A] There are no race conditions because the CPUs operate on different data.
+Each CPU checks one value of K and, if it satisfies the condition, performs
+the sum. There would be a race condition if some CPU operated on different
+values of j, but that doesn't happen.
+
+[Q] Consider an array-based stack and the given push() and pop() functions.
+What data have a race condition? How can it be fixed?
+
+    push(item)                      pop()                       is_empty()
+    {                               {                           {
+        if (top < SIZE)                 if (!is_empty())            if (top == 0)
+        {                               {                               return true
+            stack[top] = item;              top--;                  else    
+            top++;                          return stack[top];          return false;
+        }                               }                       }
+        else ERROR                      else ERROR
+    }                               }
+
+[A] The variable top and the top element of the stack have a race condition.
+Consider an empty stack and the operations push(17); pop();. If the pop()
+function reads the variable top before it gets updated, then the is_empty()
+check will return true, even though it should return false because an element
+has just been pushed. In the opposite case, consider the stack with just one
+element [42] and the sequence pop();push(17);. If they happen concurrently, the
+variable top can be decremented (goes to 0) and at the same time the top of the
+stack be overwritten [17 instead of 42]. As a result, the final state of the
+stack will be [17] (correctly), but the pop() function will return 17 instead
+of 42. The race condition can be fixed access to these variables is atomic.
+
+[Q] Explain why implementing synchronization primitives by disabling interrupts
+is not appropriate in a single-processor system if the synchronization
+primitives are to be used in user-level programs.
+
+[A] User level programs cannot be error free. Disabling interrupts for
+user-level programs may deem the system completely unresponsive.
+
+[Q] Explain why interrupts are not appropriate for implementing synchronization
+primitives in multiprocessor systems.
+
+[A] Multiprocessor systems have high contension, therefore the overhead of
+interrupts results in poor performance.
+
+[Q] For each of the following scenarios, describe the better locking mechanism
+choosing between a spinlock and a mutex lock where waiting processes sleep.
+
+    1) The lock is to be held for a short duration.
+    2) The lock is to be held for a long duration.
+    3) A thread may be put to sleep while holding the lock.
+
+[A] 
+
+    1) The lock is to be held for a short duration.         |   Spinlock
+    2) The lock is to be held for a long duration.          |   Mutex lock
+    3) A thread may be put to sleep while holding the lock. |   Mutex lock
+
+[Q] A multithreaded web server wishes to keep track of the number of requests
+it services (known as hits). Consider the two following strate- gies to prevent
+a race condition on the variable hits. The first strategy is to use a basic
+mutex lock when updating hits:
+
+    int hits;
+    mutex lock hit lock;
+
+    hit lock.acquire();
+    hits++;
+    hit lock.release();
+
+A second strategy is to use an atomic integer:
+
+    atomic t hits;
+    atomic inc(&hits);
+
+Explain which of these two strategies is more efficient.
+
+[A] The use of atomic integers is more efficient. The race condition concerns
+only a single integer variable and there is hardware support for operating on
+it atomically. In contrast, the use of locks drags requires support from the
+operating system, so that system calls and sleeping take place, making it a
+more loaded and inefficient solution.
+
+
+
+
